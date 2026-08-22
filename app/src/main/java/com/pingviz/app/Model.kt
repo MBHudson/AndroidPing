@@ -57,6 +57,17 @@ class Series(val targetId: String) {
     fun points(): Pair<List<Long>, List<Float>> =
         synchronized(lock) { times.toList() to values.toList() }
 
+    /** Average of reachable (rtt >= 0) samples, or -1 if none. */
+    fun averageMs(): Float = synchronized(lock) {
+        val v = values.filter { it >= 0f }
+        if (v.isEmpty()) -1f else v.average().toFloat()
+    }
+
+    /** Most recent sample's rtt (may be < 0 = unreachable), or null if none. */
+    fun lastMs(): Float? = synchronized(lock) {
+        if (values.isEmpty()) null else values.last()
+    }
+
     fun clear() = synchronized(lock) { times.clear(); values.clear() }
 }
 

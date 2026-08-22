@@ -19,6 +19,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var chart: LiveChartView
     private lateinit var targetList: LinearLayout
     private lateinit var alarmSwitch: SwitchCompat
+    private val statViews = HashMap<String, TextView>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +50,10 @@ class MainActivity : AppCompatActivity() {
         engine.intervalMs = settings.pingIntervalSeconds * 1000L
         engine.alarmEnabled = settings.alarmEnabled
         engine.updateTargets(targets)
-        engine.onDataChanged = { if (::chart.isInitialized) chart.invalidate() }
+        engine.onDataChanged = {
+            if (::chart.isInitialized) chart.invalidate()
+            updateStats()
+        }
 
         buildUi()
         engine.start()
@@ -140,6 +145,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshTargetList() {
         targetList.removeAllViews()
+        statViews.clear()
         if (targets.isEmpty()) {
             targetList.addView(TextView(this).apply {
                 text = "No targets. Tap \"+ Add Target\" to start monitoring."
@@ -179,6 +185,12 @@ class MainActivity : AppCompatActivity() {
             textSize = 13f
             setTextColor(resolveColorAttr(android.R.attr.textColorSecondary))
         })
+        // Per-target live stats: average + current/last ping time.
+        textCol.addView(TextView(this).apply {
+            text = statsText(t.id)
+            textSize = 13f
+            setTextColor(resolveColorAttr(android.R.attr.textColorSecondary))
+        }.also { statViews[t.id] = it })
         row.addView(textCol, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
 
         row.addView(Button(this).apply { text = "Edit" }, LinearLayout.LayoutParams(
@@ -239,6 +251,23 @@ class MainActivity : AppCompatActivity() {
         val a = TypedValue()
         theme.resolveAttribute(attr, a, true)
         return a.data
+    }
+
+    private fun updateStats() {
+        for ((id, tv) in statViews) tv.text = statsText(id)
+    }
+
+    private fun statsText(id: String): String {
+        val s = engine.series[id] ?: return "avg — · last —"
+        val avg = s.averageMs()
+        val last = s.lastMs()
+        val avgStr = if (avg < 0f) "—" else "${avg.roundToInt()} ms"
+        val lastStr = when {
+            last == null -> "—"
+            last < 0f -> "timeout"
+            else -> "${last.roundToInt()} ms"
+        }
+        return "avg $avgStr · last $lastStr"
     }
 
     private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()

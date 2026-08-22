@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.PingViz" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#00695C</item>
+        <item name="colorPrimaryVariant">#004D40</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#FFB300</item>
+        <item name="android:statusBarColor">#004D40</item>
+    </style>
+</resources>

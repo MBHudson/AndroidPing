@@ -1,0 +1,12 @@
+# Gradle
+.gradle/
+build/
+app/build/
+
+# Local
+local.properties
+*.iml
+.idea/
+
+# APK copies (nice to keep, but not source)
+PingViz-debug.apk

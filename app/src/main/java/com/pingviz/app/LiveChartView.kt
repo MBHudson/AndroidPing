@@ -87,18 +87,6 @@ class LiveChartView @JvmOverloads constructor(
                 else path.lineTo(cx, cy)
             }
             canvas.drawPath(path, linePaint)
-
-            // Legend label next to the latest point.
-            val last = times.last()
-            val lastV = vals.last()
-            if (lastV >= 0f) {
-                val x = padLeft + ((last - x0).toFloat() / windowMs) * chartW
-                val y = yFor(lastV, niceMax, padTop, chartH)
-                labelPaint.color = s.color
-                val lx = x.coerceIn(padLeft + 2f, padLeft + chartW - 220f)
-                val ly = (y - dp(10f)).coerceAtLeast(padTop + dp(12f))
-                canvas.drawText("${s.label}  ${lastV.toInt()}ms", lx, ly, labelPaint)
-            }
         }
     }
 

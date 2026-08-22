@@ -178,6 +178,7 @@ class MainActivity : AppCompatActivity() {
         textCol.addView(TextView(this).apply {
             text = t.displayName()
             textSize = 17f
+            setTypeface(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
             setTextColor(resolveColorAttr(android.R.attr.textColorPrimary))
         })
         textCol.addView(TextView(this).apply {
@@ -185,7 +186,7 @@ class MainActivity : AppCompatActivity() {
             textSize = 13f
             setTextColor(resolveColorAttr(android.R.attr.textColorSecondary))
         })
-        // Per-target live stats: average + current/last ping time.
+        // Per-target live stats: average + current/last ping time (last ms prominent).
         textCol.addView(TextView(this).apply {
             text = statsText(t.id)
             textSize = 13f
@@ -193,10 +194,13 @@ class MainActivity : AppCompatActivity() {
         }.also { statViews[t.id] = it })
         row.addView(textCol, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
 
-        row.addView(Button(this).apply { text = "Edit" }, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        // Compact "X" to remove the target. Tapping the row (not the X) opens the editor.
         row.addView(Button(this).apply {
-            text = "Remove"
+            text = "\u00D7"
+            textSize = 20f
+            minWidth = dp(40)
+            minHeight = dp(40)
+            setPadding(dp(6), dp(2), dp(6), dp(2))
             setOnClickListener {
                 targets.removeAll { it.id == t.id }
                 prefs.saveTargets(targets)

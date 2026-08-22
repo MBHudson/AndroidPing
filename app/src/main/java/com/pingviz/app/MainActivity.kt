@@ -175,22 +175,24 @@ class MainActivity : AppCompatActivity() {
         })
 
         val textCol = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        // Target's custom name — bold, rendered in the target's own color (t.color).
         textCol.addView(TextView(this).apply {
             text = t.displayName()
             textSize = 17f
             setTypeface(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
-            setTextColor(resolveColorAttr(android.R.attr.textColorPrimary))
+            setTextColor(t.color)
         })
+        // Host · transport as a gray second line (does not interfere with the colored labels).
         textCol.addView(TextView(this).apply {
             text = "${t.host}  ·  ${t.transportDetail()}"
             textSize = 13f
             setTextColor(resolveColorAttr(android.R.attr.textColorSecondary))
         })
-        // Per-target live stats: average + current/last ping time (last ms prominent).
+        // Most recent ping ms — rendered in the target's own color, refreshed live by updateStats().
         textCol.addView(TextView(this).apply {
-            text = statsText(t.id)
+            text = recentMsText(t.id)
             textSize = 13f
-            setTextColor(resolveColorAttr(android.R.attr.textColorSecondary))
+            setTextColor(t.color)
         }.also { statViews[t.id] = it })
         row.addView(textCol, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
 
@@ -258,20 +260,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateStats() {
-        for ((id, tv) in statViews) tv.text = statsText(id)
+        for ((id, tv) in statViews) tv.text = recentMsText(id)
     }
 
-    private fun statsText(id: String): String {
-        val s = engine.series[id] ?: return "avg — · last —"
-        val avg = s.averageMs()
+    // Most recent ping ms for a target (uses Series.lastMs()). "timeout" for a
+    // failed probe, "—" when there is no data yet.
+    private fun recentMsText(id: String): String {
+        val s = engine.series[id] ?: return "—"
         val last = s.lastMs()
-        val avgStr = if (avg < 0f) "—" else "${avg.roundToInt()} ms"
-        val lastStr = when {
+        return when {
             last == null -> "—"
             last < 0f -> "timeout"
             else -> "${last.roundToInt()} ms"
         }
-        return "avg $avgStr · last $lastStr"
     }
 
     private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()

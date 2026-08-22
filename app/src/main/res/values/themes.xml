@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base theme for the app. The visual language itself is defined in
+         Compose (PingTraceTheme); this XML theme just provides the window
+         chrome and starter palette for the Compose hierarchy. -->
+    <style name="Theme.PingTrace" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
